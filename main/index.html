@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>延误判断系统</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="http://unpkg.com/iview/dist/styles/iview.css"
+    />
+    <script
+      type="text/javascript"
+      src="http://vuejs.org/js/vue.min.js"
+    ></script>
+    <script
+      type="text/javascript"
+      src="http://unpkg.com/iview/dist/iview.min.js"
+    ></script>
+  </head>
+  <style>
+    .header {
+      display: flex;
+      align-items: center;
+      height: 70px;
+      background-color: #333333;
+    }
+    .left {
+      margin-left: 72px;
+    }
+    .left img {
+      width: 230px;
+    }
+    .right {
+      flex: 1;
+    }
+    .content {
+      display: flex;
+      height: calc(100vh - 70px);
+      background-color: aliceblue;
+    }
+    .left-menu {
+      height: 100%;
+      width: 250px;
+      background-color: #212528;
+    }
+    .menu {
+      height: 50px;
+      line-height: 50px;
+      text-align: center;
+      color: #999;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .menu:hover {
+      color: #e52018;
+    }
+    .active {
+      background-color: rgb(68, 68, 68, 0.8);
+      color: #e52018;
+    }
+
+    .right-content {
+      flex: 1;
+    }
+  </style>
+  <body style="margin: 0;padding: 0;">
+    <div id="app">
+      <header class="header">
+        <div class="left">
+          <img src="./images/logo.png" />
+        </div>
+        <div class="right"></div>
+      </header>
+      <div class="content">
+        <div class="left-menu">
+          <div class="menu" :class="{active:active===1}" @click="active=1">
+            延误查询
+          </div>
+          <div class="menu" :class="{active:active===2}" @click="active=2">
+            线路维护
+          </div>
+        </div>
+        <div class="right-content">
+          <div v-if="active===1">
+            <Upload
+              action="http://jsonplaceholder.typicode.com/posts/"
+              :show-upload-list="false"
+              on-success="refresh"
+              on-error="error"
+            >
+              <i-button
+                type="primary"
+                @click="refresh"
+                style="margin:20px 50px 0"
+                >上传Excel文件查询数据</i-button
+              >
+            </Upload>
+          </div>
+          <div v-if="active===2">
+            <i-button type="primary" @click="refresh" style="margin:20px 50px 0"
+              >刷新</i-button
+            >
+            <i-table
+              :columns="columns1"
+              :data="data1"
+              style="margin:20px 50px"
+            ></i-table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script>
+    new Vue({
+      el: "#app",
+      url1: "http://jsonplaceholder.typicode.com/posts/",
+      url2: "http://jsonplaceholder.typicode.com/posts/",
+      url3: "http://jsonplaceholder.typicode.com/posts/",
+      data: {
+        visible: false,
+        active: 1,
+        columns1: [
+          {
+            title: "线路类型",
+            key: "type"
+          },
+          {
+            title: "线路数量",
+            key: "number"
+          },
+          {
+            title: "最近更新",
+            key: "lastmodify"
+          },
+          {
+            title: "操作",
+            key: "action",
+            width: 150,
+            align: "center",
+            render: (h, params) => {
+              let row = params.row;
+              console.log(row);
+              const button = h(
+                "Button",
+                {
+                  style: {
+                    cursor: "pointer",
+                    marginRight: "5px",
+                    paddin: "5px 10px"
+                  },
+                  props: {
+                    type: "primary",
+                    size: "small"
+                  }
+                },
+                "上传"
+              );
+              // row.type 支线，干线
+              return h(
+                "Upload",
+                {
+                  props: {
+                    action: params.row === "干线" ? "ganxianurl" : "zhixianurl",
+                    "show-upload-list": false,
+                    "on-success":
+                      params.row === "干线"
+                        ? this.refreshGanxian
+                        : this.refreshZhixian
+                  }
+                },
+                [button]
+              );
+            }
+          }
+        ],
+        data1: [
+          {
+            type: "干线",
+            number: 18,
+            lastmodify: "2021-09-17 21:03:02"
+          },
+          {
+            type: "支线",
+            number: 25,
+            lastmodify: "2021-09-17 21:03:02"
+          }
+        ]
+      },
+      methods: {
+        refresh() {
+          // 获取数据
+          setTimeout(() => {
+            this.data1[0].number = 99;
+            this.data1[1].number = 1000;
+          }, 3000);
+        },
+        refreshGanxian() {},
+        refreshZhixian() {},
+        error() {
+          this.$Message.error("上传失败，请重试");
+        },
+        show: function() {
+          this.visible = true;
+        }
+      }
+    });
+  </script>
+</html>
